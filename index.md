@@ -5,5 +5,5 @@ Please go to [about](http://yangfanchat-env.gp2axbmhet.us-east-2.elasticbeanstal
 ## Projects:
 
 
-* [Chat App](yangfanchat-env.gp2axbmhet.us-east-2.elasticbeanstalk.com)
-* [Bus Locator](yangfanchat-env.gp2axbmhet.us-east-2.elasticbeanstalk.com/bus-locator)
+* [Chat App](http://yangfanchat-env.gp2axbmhet.us-east-2.elasticbeanstalk.com)
+* [Bus Locator](http://yangfanchat-env.gp2axbmhet.us-east-2.elasticbeanstalk.com/bus-locator)
