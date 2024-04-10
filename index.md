@@ -2,7 +2,7 @@
 
 Please go to [about](http://yangfanc.org/about-me)
 
-Hello, I am Yangfan, and I am currently a Software Developer with a background in designing/implementing scalable cloud system. I have a lot of deep hands-on experience with bulding a mordern end to end product. This covers a range of topics include but not limited to:
+Hello, I am Yangfan, and I am a Software Developer with a background in designing/implementing scalable cloud system. I have a lot of deep hands-on experience with bulding a mordern end to end product. This covers a wide range of topics include but not limited to:
 * API Gateway (AuthN/AuthN, throttling, etc)
 * Load Balancer
 * Microservices (Containers/Autoscaling)
