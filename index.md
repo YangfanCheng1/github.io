@@ -1,4 +1,4 @@
-# Welcome to Yangfan's personal Github Page!
+# Welcome
 
 Please go to [about](http://yangfanc.org/about-me)
 
