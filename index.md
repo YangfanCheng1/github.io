@@ -31,10 +31,31 @@ Much of my experience is in the Java/SpringBoot/Docker/Kubernetes/AWS ecosystem.
 * [Bus Locator](http://yangfanchat-env.gp2axbmhet.us-east-2.elasticbeanstalk.com/bus-locator)
 
 
-### Java/SpringBoot
+## General Approaches/Techniques
+### AOP
 When it comes to aspect-oriented programming, one could greatly reduce amount of boilerplate/redundant code and create greater modularity. Logging exemplifies this in that much of non application/business logic executions should have their logs automated. 
 
-An example as follows:
+Performance aside, a naive approach in writing a log statement might be as follows:
+```
+// log GET user(37)
+@GetMapping("api/v1/users/{id}")
+public getUser(@PathVariable String id) {
+  log.info("GET user({})", id);
+}
+
+// log 
+// PATCH user(37), body(email=a@b.c)
+// Time taken: 778ms
+@PatchMapping("api/v1/users/{id}")
+public getUser(@PathVariable String id, @Validated @RequestBody UserRequest userReq) {
+  val start = Instant.now();
+  log.info("PATCH user({}), body({})", id, userReq);
+  val end = Instant.now();
+  log.info("Time taken: {}", end - start);
+}
+```
+
+Using Aspect, one could delegate logging concern and achieve above without explicit logging:
 ```
 @Aspect
 @Slf4j
@@ -79,8 +100,66 @@ public class LogConfig {
     }
 }
 ```
-This snippet shows that no only we can automate logs for each http request to our API, but also we can log extraction time using custom annotation: 
+Above snippet shows that no only we can automate logs for each http request to our API, but also we can log extraction time using custom annotation: 
 > 2024-04-11T13:00:39.720-04:00  INFO [core, 661aba370bf972c054d12916af39f3fa, 54d12916af39f3fa] 56182 --- [nio-8080-exec-6] io.github.yangfan.core.CoreController    : GET /api/users?id=123
 
 And:
 > 2024-04-11T13:00:39.798-04:00  INFO [core, 661aba370bf972c054d12916af39f3fa, 54d12916af39f3fa] 56182 --- [nio-8080-exec-6] i.g.y.core.common.logging.LogConfig      : getFoo([123]) -> FooBarResponse[value=a, b] - time taken: 70ms
+
+### Declarative Programming
+Maintenance and readability become critical aspects of any code base that is evolving to be increasingly large and complex. That's why having a declarative style can be very beneficial. AssertJ, for example, has become a popular way in writing unit tests in java due to its declarative-ness. Let's take a naive approach example in object comparison:
+
+```
+if (coffee.equals(drink)
+        || latte.equals(drink)
+        || cap.equals(drink)) {
+    ...
+}
+
+if (weight.comparesTo(AVG_WEIGHT) < 0 || weight.comparesTo(AVG_WEIGHT) == 0) {
+    ...
+}
+```
+Instead, we can make the code more intuitive and readable by applying a declarative style.
+
+Given that the object is of a class that extends Comparable:
+
+```
+if (ComparableObj.of(drink).isAnyOf(coffee, latte, cap)) {..}
+if (ComparableObj.of(weight).isLessThanOrEqual(AVG_WEIGHT)) {..}
+
+```
+We can provide such construct as such:
+
+```java
+public class ComparableObj<T extends Comparable<T>> {
+    private T val;
+
+    private ComparableObj(T t) {this.val = t;}
+
+    public static <T extends Comparable<T>> ComparableObj<T> of(T t) {
+        Assert.notNull(t, "Arg cannot be null");
+        return new ComparableObj<>(t);
+    }
+
+    @SafeVarargs
+    public final boolean isAnyOf(T... values) {
+        return Arrays.asList(values).contains(this.val);
+    }
+
+    public final boolean isLessThanOrEqualTo(T operand) {
+        return isLessThan.or(isEqualTo).test(operand);
+    }
+
+    public final boolean isGreaterThan(T operand) {
+        return isGreaterThan.test(operand);
+    }
+
+    private final Predicate<T> isLessThan = arg -> this.val.compareTo(arg) < 0;
+
+    private final Predicate<T> isEqualTo = arg -> this.val.compareTo(arg) == 0;
+
+    private final Predicate<T> isGreaterThan = arg -> this.val.compareTo(arg) > 0;
+
+}
+```
