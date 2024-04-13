@@ -1,5 +1,3 @@
-## About
-
 Hello, I am Yangfan, and I am a Software Developer with a background in designing/implementing scalable cloud system. I have a lot of deep hands-on experience with bulding a mordern end to end product. This covers a wide range of topics include but not limited to:
 * API Gateway (AuthN/AuthN, throttling, etc)
 * Load Balancer
@@ -31,3 +29,55 @@ Much of my experience is in the Java/SpringBoot/Docker/Kubernetes/AWS ecosystem.
 * [Chat App](http://yangfanchat-env.gp2axbmhet.us-east-2.elasticbeanstalk.com)
 * [Introduction](http://yangfanc.org/about-me)
 * [Bus Locator](http://yangfanchat-env.gp2axbmhet.us-east-2.elasticbeanstalk.com/bus-locator)
+
+
+### Java/SpringBoot
+When it comes to aspect-oriented programming, one could greatly reduce amount of boilerplate/redundant code and create greater modularity. Logging exemplifies this in that much of non application/business logic executions should have their logs automated. 
+
+An example as follows:
+```
+@Aspect
+@Slf4j
+@Configuration
+public class LogConfig {
+
+    private static final Map<Class<?>, Logger> LOGGERS = Maps.newConcurrentMap();
+
+    private Logger logger(JoinPoint joinPoint) {
+        val clazz = joinPoint.getTarget().getClass();
+        return LOGGERS.computeIfAbsent(clazz, LoggerFactory::getLogger);
+    }
+
+    @Pointcut("within(@org.springframework.web.bind.annotation.RestController *)")
+    void restController() {
+        // noop
+    }
+
+    @Before("restController()")
+    void beforeController(JoinPoint joinPoint) {
+        val log = logger(joinPoint);
+        val attributes = RequestContextHolder.currentRequestAttributes();
+        if (attributes instanceof ServletRequestAttributes) {
+            val request = ((ServletRequestAttributes) attributes).getRequest();
+            val name = joinPoint.getSignature().getName();
+            log.info("{} {}{}",
+                    request.getMethod(),
+                    request.getServletPath(),
+                    Optional.ofNullable(request.getQueryString()).map(q -> "?" + q).orElse(""));
+            log.debug("{}() - args:  {}", name, joinPoint.getArgs());
+        }
+    }
+
+    @SneakyThrows
+    @Around("@annotation(LogExecutionTime)")
+    public Object logExecutionTime(ProceedingJoinPoint point) {
+        val start = System.currentTimeMillis();
+        val result = point.proceed();
+        val end = System.currentTimeMillis();
+        log.info("{}({}) -> {} - time taken: {}ms", point.getSignature().getName(), point.getArgs(), result, end - start);
+        return result;
+    }
+}
+```
+This snippet shows that no only we can automate logs for each http request to our API, but also we can log extraction time using custom annotation. 
+> 
