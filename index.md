@@ -56,7 +56,7 @@ public getUser(@PathVariable String id, @Validated @RequestBody UserRequest user
 ```
 
 Using Aspect, one could delegate logging concern and achieve above without explicit logging:
-```
+```java
 @Aspect
 @Slf4j
 @Configuration
@@ -127,7 +127,6 @@ Given that the object is of a class that extends Comparable:
 ```
 if (ComparableObj.of(drink).isAnyOf(coffee, latte, cap)) {..}
 if (ComparableObj.of(weight).isLessThanOrEqual(AVG_WEIGHT)) {..}
-
 ```
 We can provide such construct as such:
 
@@ -163,3 +162,169 @@ public class ComparableObj<T extends Comparable<T>> {
 
 }
 ```
+
+### Design Pattern - Chain of Responsibility
+Let's visit one of the popular design patterns - Chain of Responsibility. With Lambda's syntactic sugar since Java 8, we could write much cleaner code using such pattern. Say we want to implement a search functionality in a file system, and this search has various criteria by which resulting files are filtered. We could define a Filter interface as such:
+```java
+
+@FunctionalInterface
+public interface Filter {
+    boolean is(File resource, Params params);
+
+    default Filter and(Filter next) {
+        return (resource, params) ->
+                is(resource, params) && next.is(resource, params);
+    }
+
+    static Filter nameFilter() {
+        return (resource, params) -> {
+            if (params.name != null) {
+                return resource.getName().contains(params.name);
+            }
+            return true;
+        };
+    }
+
+    static Filter extensionFilter() {
+        return (resource, params) -> {
+            if (params.extension != null) {
+                return params.extension.startsWith(".") && resource.getName().endsWith(params.extension);
+            }
+            return true;
+        };
+    }
+
+    static Filter maxFileSizeFilter() {
+        return (resource, params) -> {
+            if (params.size != null) {
+                return params.size > resource.getSize();
+            }
+            return true;
+        };
+    }
+}
+
+@AllArgsConstructor
+@NoArgsConstructor
+class Params {
+    String name;
+    Integer size;
+    String extension;
+}
+
+```
+And `Resource` interface which would represent a file or a directory:
+
+```java
+public interface Resource {
+
+    String getName();
+
+    boolean isDirectory();
+
+    void setName(String name);
+
+    int getSize();
+
+    Instant getLastModified();
+}
+
+public abstract class AbstractResource implements Resource {
+
+    protected String name;
+    protected Instant lastModified;
+
+    public AbstractResource(String name) {
+        this.name = name;
+        this.lastModified = Instant.now();
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public Instant getLastModified() {
+        return this.lastModified;
+    }
+}
+
+
+public class Directory extends AbstractResource {
+
+    private final List<Resource> resources;
+
+    public Directory(String name) {
+        super(name);
+        this.resources = new ArrayList<>();
+    }
+
+
+    @Override
+    public boolean isDirectory() {
+        return true;
+    }
+
+    @Override
+    public int getSize() {
+        return resources.stream().map(Resource::getSize).reduce(0, Integer::sum);
+    }
+
+    public boolean addResource(Resource resource) {
+        return this.resources.add(resource);
+    }
+
+    public List<Resource> getResources() {
+        return resources;
+    }
+}
+
+```
+
+Given different `Filter`s are defined as above, we could now compose a different chain of file filters such that each filter performs its function in isolation. Such approach is similar to Stream API provides since Java 8:
+```
+Streamable.of(coffee, latte, cappuccino)
+    .filter(Props::hasCaffeine)
+    .filter(Props::hasMilk)
+    .filter(Props::hasExpresso)
+    ...
+```
+Now if we want to compose our file filter chain, we simply concatenate using `and(filter)`. Say we want to create a filter chain that would return a list of MP3 files containing the name "jaychou", we could define a simple BFS search function as such:
+```
+public class FileSearch {
+    private static final Filter MP3ByArtistFilter = Filter.nameFilter().and(extensionFilter());
+
+    public List<Resource> getMP3FilesContainingName(String name) {
+        var params = new Params();
+        params.name = name;
+        params.extension = ".mp3";
+        
+        var result = new ArrayList<>();
+        var queue = new LinkedList<>();
+        
+        queue.add(directory);
+        while (!queue.isEmpty()) {
+            var resource = queue.poll();
+            
+            if (resource.isDirectory()) { // If resource is folder, then add its resources to the queue
+                Directory dir = (Directory) resource;
+                dir.getResources().forEach(queue::offer);
+            } else { // otherwise resource is a file, then apply desired filter
+                File file = (File) resource;
+                if (MP3ByArtistFilter.is(file, params)) {
+                    result.add(file);
+                }
+            }
+        }
+    
+        return result;
+    }
+}
+```
+  
