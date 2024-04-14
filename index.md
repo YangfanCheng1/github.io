@@ -1,19 +1,21 @@
-Hello, I am Yangfan, and I am a Software Developer with a background in designing/implementing scalable cloud system. I have a lot of deep hands-on experience with bulding a mordern end to end product. This covers a wide range of topics include but not limited to:
+Thank you for visiting the site!
+
+Hello, I am Yangfan. I am a Software Developer with a background in designing/implementing scalable cloud system. I have a lot of deep hands-on experience with building a modern end to end product. This covers a wide range of topics include but not limited to:
 * API Gateway (AuthN/AuthN, throttling, etc)
 * Load Balancer
 * Microservices (Containers/Autoscaling)
 * Communication method (RESTful/GraphQL)
-* Error handling (Retry, Timeout, Distributed logging/monitoring/alerting)
+* Error handling (Retry, Timeout, CircuitBreaker)
 * Request Optimization (Caching/Queues)
 * Database
 * Data Ingestion (Async/Batch processing)
+* Monitoring (Distributed tracing, Dashboards, Alerting)
 * CICD (Version Control/Artifactory/Rollback plan)
 
-Much of my experience is in the Java/SpringBoot/Docker/Kubernetes/AWS ecosystem. This very much resembles the tech stack at companies like Netflix (which is predomantly a Java shop). A lot of what I use during day-to-day job is very much language/framework specific, but I spent a lot of time in gaining advanced knowledge about each subject, even if they may not directly be used at work. For example, some of my favorite topics to explore are:
-* Java for things like JVM (JIT, GC, Class Loader..), Complier (JSR-269/Annotation Processing, AST/Lombok), Lambda (FI, Vavr, function composition over inheritance), Profiling (Java Instrumentation API)..
+Much of my experience is in the Java/SpringBoot/Docker/Kubernetes/AWS ecosystem. This very much resembles the tech stack at companies like Netflix (which is predominantly a Java shop). A lot of what I use during day-to-day job is very much language/framework specific, but I spent a lot of time in gaining advanced knowledge about each subject, even if they may not directly be used at work. For example, some of my favorite topics to explore are:
+* Java for things like JVM (JIT, GC, Class Loader..), Compiler (JSR-269/Annotation Processing, AST/Lombok), Lambda (FI, Vavr, function composition over inheritance), Profiling (Java Instrumentation API)..
 * Spring/Boot -- IoC, Template, AutoConfiguration, Die hard fan :)
 * MongoDB -- Model (Subset pattern, no ACID (transaction)), Aggregation, Change Stream
-
 
 
 ## Github
@@ -32,6 +34,12 @@ Much of my experience is in the Java/SpringBoot/Docker/Kubernetes/AWS ecosystem.
 
 
 ## General Approaches/Techniques
+I'd like to share a collection of approaches/techniques I've come across and adapted over the years. They show some glimpse into the work I do, w.r.t how I write code and what I share with other developers. Some of which are technology/framework specific, but most should serve a general purpose in software development. Hope you can enjoy them too! 
+
+* [AOP](#aop)
+* [Declarative Programming](#declarative-programming)
+* [Design Pattern - Chain of Responsibility](#design-pattern---chain-of-responsibility)
+
 ### AOP
 When it comes to aspect-oriented programming, one could greatly reduce amount of boilerplate/redundant code and create greater modularity. Logging exemplifies this in that much of non application/business logic executions should have their logs automated. 
 
@@ -295,12 +303,12 @@ Streamable.of(coffee, latte, cappuccino)
     .filter(Props::hasExpresso)
     ...
 ```
-Now if we want to compose our file filter chain, we simply concatenate using `and(filter)`. Say we want to create a filter chain that would return a list of MP3 files containing the name "jaychou", we could define a simple BFS search function as such:
-```
+Now if we want to compose our file filter chain, we simply concatenate using `and(filter)`. Say we want to create a filter chain that would return a list of MP3 files containing some artist name, we could define a simple BFS search function as such:
+```java
 public class FileSearch {
     private static final Filter MP3ByArtistFilter = Filter.nameFilter().and(extensionFilter());
 
-    public List<Resource> getMP3FilesContainingName(String name) {
+    public List<Resource> getMP3FilesContainingName(Resource directory, String name) {
         var params = new Params();
         params.name = name;
         params.extension = ".mp3";
@@ -313,10 +321,10 @@ public class FileSearch {
             var resource = queue.poll();
             
             if (resource.isDirectory()) { // If resource is folder, then add its resources to the queue
-                Directory dir = (Directory) resource;
+                var dir = (Directory) resource;
                 dir.getResources().forEach(queue::offer);
             } else { // otherwise resource is a file, then apply desired filter
-                File file = (File) resource;
+                var file = (File) resource;
                 if (MP3ByArtistFilter.is(file, params)) {
                     result.add(file);
                 }
