@@ -38,6 +38,7 @@ I'd like to share a collection of approaches/techniques I've come across and ada
 
 * [AOP](#aop)
 * [Declarative Programming](#declarative-programming)
+* [Parallelism in Java](#parallelism)
 * [Design Pattern - Chain of Responsibility](#design-pattern---chain-of-responsibility)
 
 ### AOP
@@ -108,14 +109,14 @@ public class LogConfig {
     }
 }
 ```
-Above snippet shows that no only we can automate logs for each http request to our API, but also we can log extraction time using custom annotation: 
+Above snippet shows that no only we can automate logs for each http request to our API, but also we can log execution time using custom annotation: 
 > 2024-04-11T13:00:39.720-04:00  INFO [core, 661aba370bf972c054d12916af39f3fa, 54d12916af39f3fa] 56182 --- [nio-8080-exec-6] io.github.yangfan.core.CoreController    : GET /api/users?id=123
 
 And:
 > 2024-04-11T13:00:39.798-04:00  INFO [core, 661aba370bf972c054d12916af39f3fa, 54d12916af39f3fa] 56182 --- [nio-8080-exec-6] i.g.y.core.common.logging.LogConfig      : getFoo([123]) -> FooBarResponse[value=a, b] - time taken: 70ms
 
 ### Declarative Programming
-Maintenance and readability become critical aspects of any code base that is evolving to be increasingly large and complex. That's why having a declarative style can be very beneficial. AssertJ, for example, has become a popular way in writing unit tests in java due to its declarative-ness. Let's take a naive approach example in object comparison:
+Maintenance and readability become critical aspects of any code base that is evolving to be increasingly large and complex. That's why having a declarative style can be very beneficial. AssertJ, for example, has become a popular way in writing unit tests in java due to its declarative-ness. Let's look at a naive approach in object comparison:
 
 ```
 if (coffee.equals(drink)
@@ -171,8 +172,33 @@ public class ComparableObj<T extends Comparable<T>> {
 }
 ```
 
+### Parallelism
+Prior to Stream API, writing parallel processing or concurrency code in Java is likely to open a can of worms. And doing such optimization without knowing common pitfalls and executing thorough testing can lead to behaviors such as unexpected output and OOM errors. Stream API's `parallelStream` greatly simplifies and overcome such issues, albeit coming with pitfalls of its own. Let's look at how one would process a large (CSV) data file and upsert each entry into a data store.
+```
+public sychronized Future<Integer> syncByFile(MultipartFile file) {
+    try (BufferedReader br = new BufferedReader(
+            new InputStreamReader(file.getInputStream()))
+    ) {
+        int numUpserted =
+                (int) br.lines()
+                        .parallel()
+                        .filter(line -> !StringUtils.isEmpty(line))
+                        .filter(Product::isValid)
+                        .map(Product::convertToProduct)
+                        .map(productRepo::save)
+                        .peek(product -> log.info("Product(id={}) upserted", product.getId()))
+                        .count();
+        return new AsyncResult<>(numUpserted);
+    } catch (IOException e) {
+        log.error("Error reading file: {}", file.getName(), e);
+        return new AsyncResult<>(-1);
+    }
+}
+```
+
+
 ### Design Pattern - Chain of Responsibility
-Let's visit one of the popular design patterns - Chain of Responsibility. With Lambda's syntactic sugar since Java 8, we could write much cleaner code using such pattern. Say we want to implement a search functionality in a file system, and this search has various criteria by which resulting files are filtered. We could define a Filter interface as such:
+Let's visit one of the popular design patterns - Chain of Responsibility. With Lambda's syntactic sugar since Java 8, we could write much concise code using such pattern. Say we want to implement a search functionality in a file system, and this search has various criteria by which resulting files are filtered. We could define a Filter interface as such:
 ```java
 
 @FunctionalInterface
@@ -221,7 +247,7 @@ class Params {
 }
 
 ```
-And `Resource` interface which would represent a file or a directory:
+And `Resource` interface which represents a file or a directory:
 
 ```java
 public interface Resource {
