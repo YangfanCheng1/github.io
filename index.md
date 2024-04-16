@@ -40,6 +40,7 @@ I'd like to share a collection of approaches/techniques I've come across and ada
 * [Declarative Programming](#declarative-programming)
 * [Parallelism in Java](#parallelism)
 * [Design Pattern - Chain of Responsibility](#design-pattern---chain-of-responsibility)
+* [Extensibility](#extensibility-in-oop)
 
 ### AOP
 When it comes to aspect-oriented programming, one could greatly reduce amount of boilerplate/redundant code and create greater modularity. Logging exemplifies this in that much of non application/business logic executions should have their logs automated. 
@@ -361,4 +362,36 @@ public class FileSearch {
     }
 }
 ```
-  
+
+### Extensibility in OOP
+Extensibility in OOP can allow for great flexibility & creativity in problem. Ever coming cross a need to build key value pairs in a HashMap but not wanting to add entries with `null` values? Here is a typical solution:
+```
+void addHeaderIfNotNull(Map<String, String> headers, String key, String val) {
+    if (val != null) {
+        header.add(key, val);
+    }
+}
+..
+Map<String, String> headers = new HashMap<>();
+addHeaderIfNotNull(headers, "x-client-id", params._0)
+addHeaderIfNotNull(headers, "x-request-id", params._1)
+```
+What if we want an immutable Map. Due to `Map.of()` not accepting null values. Below would result in an error:
+```
+Map.of("x-client-id", params._0, "x-request-id", params._1);
+```
+How can we overcome this shortcoming? Extend & customize `Map`! Below is an example using Guava's ImmutableMap (which is a quite popular alternative esp. before Java 9)
+```java
+public static class CustomImmutableMapBuilder<K, V> extends ImmutableMap.Builder<K, V> {
+    public CustomImmutableMapBuilder<K, V> putIfValNotNull(K key, V val) {
+        if (val != null) super.put(key, val);
+        return this;
+    }
+
+    @Override
+    public CustomImmutableMapBuilder<K, V> put(@NonNull K key, @NonNull V val) {
+        super.put(key, val);
+        return this;
+    }
+}
+```
