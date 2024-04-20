@@ -42,7 +42,9 @@ I'd like to share a collection of approaches/techniques I've come across and ada
 * [Design Pattern - Chain of Responsibility](#design-pattern---chain-of-responsibility)
 * [Extensibility](#extensibility-in-oop)
 
-* [Cloud](./)
+Not on this page:
+* [Cloud](./cloud.md)
+* [TODO](./)
 
 ### AOP
 When it comes to aspect-oriented programming, one could greatly reduce amount of boilerplate/redundant code and create greater modularity. Logging exemplifies this in that much of non application/business logic executions should have their logs automated. 
