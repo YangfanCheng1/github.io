@@ -12,7 +12,7 @@ Hello, I am Yangfan. I am a Software Developer with a background in designing/im
 * Monitoring (Distributed tracing, Dashboards, Alerting)
 * CICD (Version Control/Artifactory/Rollback plan)
 
-Much of my experience is in the Java/SpringBoot/Docker/Kubernetes/AWS ecosystem. This very much resembles the tech stack at companies like Netflix (which is predominantly a Java shop). A lot of what I use during day-to-day job is very much language/framework specific, but I spent a lot of time in gaining advanced knowledge about each subject, even if they may not directly be used at work. For example, some of my favorite topics to explore are:
+Much of my experience is in the Java/SpringBoot/Docker/Kubernetes/AWS ecosystem. This very much resembles the tech stack at companies like Netflix (which is predominantly a Java shop). A lot of what I use during day-to-day job is very much language/framework specific, but I spent a lot of time in gaining advanced knowledge about each subject, even if they may not directly be used at work. Many languages/frameworks go through cycles of being relevant and what matters over time is understanding & applying the cores behind these technologies! For example, some of my favorite topics to explore are:
 * Java for things like JVM (JIT, GC, Class Loader..), Compiler (JSR-269/Annotation Processing, AST/Lombok), Lambda (FI, Vavr, function composition over inheritance), Profiling (Java Instrumentation API)..
 * Spring/Boot -- IoC, Template, AutoConfiguration, Die hard fan :)
 * MongoDB -- Model (Subset pattern, no ACID (transaction)), Aggregation, Change Stream
