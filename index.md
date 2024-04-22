@@ -406,3 +406,16 @@ public static class CustomImmutableMapBuilder<K, V> extends ImmutableMap.Builder
     }
 }
 ```
+This way we can instantiate an `Map` like so:
+```
+var nameMap = new CustomImmutableMapBuilder<String, Object>()
+        .putIfValNotNull("firstName", firstName)
+        .putIfValNotNull("middleName", middleName)
+        .putIfValNotNull("lastName", lastName)
+        .build();
+
+# Test assertions
+assertThat(nameMap.containsKey(firstName)).isTrue();
+assertThat(nameMap.containsKey(lastName)).isTrue();
+assertThat(nameMap.containsKey(middleName)).isFalse();
+```
