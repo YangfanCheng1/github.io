@@ -19,7 +19,7 @@ Much of my experience is in the Java/SpringBoot/Docker/Kubernetes/AWS ecosystem.
 
 _OutLook_
 
-Many languages/frameworks go through cycles of being relevant and what I aim at is by covering breadth and depth of many subjects through rigorous studying. With the rise of AI in recent years. I intend to shift some focus to such field but at the same time I feel the lack of foundational understanding - such as related mathematics - has become the greatest inertia to overcome. I'd be very excited to learn & contribute should the opportunity presents itself!
+Many languages/frameworks go through cycles of being relevant and what I aim at is by covering breadth and depth of many subjects through rigorous studying. With the rise of AI in recent years, I intend to shift some focus to this field but at the same time I feel the lack of foundational understanding - such as related mathematics - has become the greatest inertia to overcome. I'd be very excited to learn & contribute should the opportunity presents itself!
 
 
 ## Github

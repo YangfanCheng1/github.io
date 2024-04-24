@@ -1,7 +1,7 @@
 ## Cloud
 Let's talk following System/Cloud Architecture subjects!
  * [Multi-Region/FailOver](#multi-regionfailover)
- * [Distributed Tracing]
+ * [Distributed Tracing](#distributed-tracing--observability)
 
 ## Multi-region/FailOver
 Having our application hosted in multiple regions not only improve overall latency but also provide a way to fail over in event of any regional outage. Furthermore, a centralized domain - say `example.com` instead of `example.east.com` and `exmaple.west.com` - should be used with a DNS Service like AWS Route53 that takes care of routing. 
@@ -54,3 +54,17 @@ In distributed tracing, a span tree is constructed as illustrated with below dia
 ![Distributed Tracing](distributed-tracing.png)
 
 Given above setup, it becomes intuitive to trace the life cycle of a client request. In each downstream call, we can observe the internal state of the request by looking up its spanId.
+
+#### Console logs:
+serviceA:
+> 2024-04-01T21:27:38.114-04:00 INFO [serviceA, 6628600af2d1ca0962633e65588ac84b, ae3cd4c90aeeb72a] 19380 --- [pool-2-thread-1] io.github.yangfan.core.foo.ServiceBClient     : [ServiceBClient#getUsers] ---> GET http://api.serviceB.com/users/1 HTTP/1.1
+
+serviceB:
+> 2024-04-01T21:27:38.114-04:00 INFO [serviceB, 6628600af2d1ca0962633e65588ac84b, f47ac261b3f3c2e7] 19380 --- [pool-1-thread-1] GET /users?id=1
+
+
+#### Splunk:
+We can query all the relevant logs using traceId or parent-child relationship using spanId:
+```spl
+index=serviceA_dev traceId=6628600af2d1ca0962633e65588ac84b
+```
