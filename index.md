@@ -373,6 +373,55 @@ public class FileSearch {
     }
 }
 ```
+Note that Filter above gives an impression of first class function, meaning that function gets treated as first class citizens -- variables/arguments/returned type, but Lambda function is actually wrapped as an Object, which is truly first class in Java
+#### First order function
+```java
+@FunctionalInterface
+interface MathOperation {
+    int apply(int x);
+}
+
+public class FirstOrder {
+    // Assigning functions to variables (using lambda expressions)
+    static final MathOperation square = x -> x * x;
+    static final MathOperation cube = x -> x * x * x;
+    
+    public int printResult(int x, MathOperation op) {
+        System.out.println(op.apply(x));
+    }
+
+    public void test(String[] args) {
+        printResult(2, square); // 4
+        printResult(2, cube); // 8
+    }
+}
+```
+
+And javascript & python equivalent where functions are first class:
+```javascript
+
+printResult = (number, op) => console.log(op(number))
+
+const square = x => x * x;
+const cube = x => x * x * x;
+
+printResult(2, square);
+printResult(2, cube);
+
+--- python
+def print_result(number, op):
+    print(op(number))
+
+def square(x):
+    return x * x
+
+def cube(x):
+    return x * x * x
+
+print_result(2, square)
+print_result(2, cube)
+```
+
 
 ### Extensibility in OOP
 Extensibility in OOP can allow for great flexibility & creativity in problem. Ever coming cross a need to build key value pairs in a HashMap but not wanting to add entries with `null` values? Here is a typical solution:
