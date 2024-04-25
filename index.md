@@ -373,7 +373,7 @@ public class FileSearch {
     }
 }
 ```
-Note that Filter above gives an impression of first class function, meaning that function gets treated as first class citizens -- variables/arguments/returned type, but Lambda function is actually wrapped as an Object, which is truly first class in Java
+Note that `Filter` above gives an impression of first class function, meaning that function gets treated as first class citizens -- variables/arguments/returned type, but Lambda function is actually wrapped as an Object, which is truly first class in Java.
 #### First order function
 ```java
 @FunctionalInterface
@@ -399,7 +399,7 @@ public class FirstOrder {
 
 And javascript & python equivalent where functions are first class:
 ```javascript
-
+--- javascript
 printResult = (number, op) => console.log(op(number))
 
 const square = x => x * x;
