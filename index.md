@@ -121,7 +121,7 @@ public class LogConfig {
     }
 }
 ```
-Above snippet shows that no only we can automate logs for each http request to our API, but also we can log execution time using custom annotation: 
+Above snippet shows that not only we can automate logs for each http request to our API, but also we can log execution time using custom annotation: 
 > 2024-04-11T13:00:39.720-04:00  INFO [core, 661aba370bf972c054d12916af39f3fa, 54d12916af39f3fa] 56182 --- [nio-8080-exec-6] io.github.yangfan.core.CoreController    : GET /api/users?id=123
 
 And:
