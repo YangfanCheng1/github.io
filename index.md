@@ -48,7 +48,7 @@ I'd like to share a collection of approaches/techniques I've come across and ada
 
 Not on this page:
 * [Cloud](./cloud.md)
-* [Web](./)
+* [Web](./web.md)
 * Math (TODO)
 * Security (TDOO)
 * AI/ML (TODO)
