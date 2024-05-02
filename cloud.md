@@ -2,6 +2,7 @@
 Let's talk following System/Cloud Architecture subjects!
  * [Multi-Region/FailOver](#multi-regionfailover)
  * [Distributed Tracing](#distributed-tracing--observability)
+ * [Distrbuted Configruation](#distributed-configuration)
 
 ## Multi-region/FailOver
 Having our application hosted in multiple regions not only improve overall latency but also provide a way to fail over in event of any regional outage. Furthermore, a centralized domain - say `example.com` instead of `example.east.com` and `exmaple.west.com` - should be used with a DNS Service like AWS Route53 that takes care of routing. 
@@ -68,3 +69,49 @@ We can query all the relevant logs using traceId or parent-child relationship us
 ```spl
 index=serviceA_dev traceId=6628600af2d1ca0962633e65588ac84b
 ```
+
+### Distributed Configuration
+As we deploy an application across different environments, we'd need to externalize application specific configurations. It makes sense to centralize these configurations in a single service as opposed managing each application separately. There are several solutions to this. Two notable ones are:
+* Consul
+* Cloud Config (Based on Git repository)
+
+#### Consul
+HashiCorp's Consul offers a feature allows us to update application configuration on a fly, and across all services in a central store.
+If using Spring Boot, we can simply include a starter dependency and configuration url:
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-consul-config</artifactId>
+</dependency>
+```
+And application properties:
+```yaml
+# bootstrap.yaml
+spring:
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      config.enabled: true
+
+# actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh
+```
+And with configuration beans annotated with `@RefreshScope`, we can simply update Consul and invoke `/actuator/refresh` API to rebind application properties.
+```java
+
+@RefreshScope
+@ConfigurationProperties("my.app")
+@Configuration
+public class MyAppConfig {
+    //...
+}
+```
+
+#### Cloud Config
+
+how do we treat application configuration updates as a versioning system? Spring Cloud Config offers this solution
