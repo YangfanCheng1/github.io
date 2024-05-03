@@ -149,7 +149,7 @@ Given that the object is of a class that extends Comparable:
 if (ComparableObj.of(drink).isAnyOf(coffee, latte, cap)) {..}
 if (ComparableObj.of(weight).isLessThanOrEqual(AVG_WEIGHT)) {..}
 ```
-We can provide such construct as such:
+We can provide a construct as such:
 
 ```java
 public class ComparableObj<T extends Comparable<T>> {
@@ -458,9 +458,9 @@ public static class CustomImmutableMapBuilder<K, V> extends ImmutableMap.Builder
 This way we can instantiate an `Map` like so:
 ```
 var nameMap = new CustomImmutableMapBuilder<String, Object>()
-        .putIfValNotNull("firstName", firstName)
+        .put("firstName", firstName)
         .putIfValNotNull("middleName", middleName)
-        .putIfValNotNull("lastName", lastName)
+        .put("lastName", lastName)
         .build();
 
 # Test assertions
