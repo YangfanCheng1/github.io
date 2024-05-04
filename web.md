@@ -4,6 +4,7 @@
 * [Security - CORS]
 * [Security - XSS]
 * [Security - WAF]
+* [API Versioning](#api-versioning)
 
 ### Security - CSRF
 CSRF is a common attack during which a victim user is exploited by attacker tricking user into using authenticated credentials (such as session cookie) to perform unintended actions, i.e. transfer fund from user's bank to that of attacker. 
@@ -55,3 +56,21 @@ By default, CSRF protection is enabled by Spring Security so that above is redun
 @EnableRedisHttpSession(maxInactiveIntervalInSeconds = 3600)
 ```
 And that's it!
+
+### API Versioning
+API versioning is debatable. One would argue that a good API design would not subject itself to versioning. Nonetheless,
+there are several approaches in designing versioning in API. In HTTP, these are the common ones:
+* URL path (i.e. `/api/v1/users`)
+* Query Parameters (i.e. `/api/users?version=1.2.3`)
+* HTTP headers (Content Negotiation)
+
+Let's look at versioning using MIME type:
+```java
+@RequestMapping(produces = "application/my.api.v1+json")
+public class MyAPIV1Controller {}
+
+@RequestMapping(produces = "application/my.api.v2+json")
+public class MyAPIV2Controller {}
+```
+
+This way we will not introduce breaking changes whilst clients migrate to newer version.
