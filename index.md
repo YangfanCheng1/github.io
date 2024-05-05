@@ -1,6 +1,6 @@
 Thank you for visiting the site!
 
-Hello, I am Yangfan. I am a Software Developer with a background in designing/implementing scalable cloud applications & systems. I have a lot of deep hands-on experience with building a modern end to end web based product. This covers a wide range of topics include but not limited to:
+Hello, I am Yangfan. I am a Software Developer with a background in designing/implementing scalable cloud applications & systems. I have a lot of deep hands-on experience with building a modern end to end web based product. This covers a wide range of topics including but not limited to:
 * API Gateway (AuthN/AuthN, throttling, etc)
 * Load Balancer
 * Microservices (Containers/Autoscaling)
@@ -522,9 +522,9 @@ public ResponseEntity<ErrorResponse> handleDownstreamException(DownstreamExcepti
 
 // ErrorResponse
 public record ErrorResponse (
-    UUID id;
-    String error;
-    Instant
+    UUID id,
+    String error,
+    Instant timestamp
 ) {..}
 ```
 
