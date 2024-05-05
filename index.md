@@ -44,6 +44,7 @@ I'd like to share a collection of approaches/techniques I've come across and ada
 * [Declarative Programming](#declarative-programming)
 * [Parallelism in Java](#parallelism)
 * [Design Pattern - Chain of Responsibility](#design-pattern---chain-of-responsibility)
+* [Error Handling](#error-handling)
 * [Extensibility](#extensibility-in-oop)
 
 Not on this page:
