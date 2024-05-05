@@ -51,6 +51,7 @@ Not on this page:
 * [Web](./web.md)
 * [CICD] (TODO)
 * Math (TODO)
+* Algorithms (TODO)
 * AI/ML (TODO)
 
 ### AOP
@@ -421,6 +422,112 @@ def cube(x):
 print_result(2, square)
 print_result(2, cube)
 ```
+
+### Error Handling
+The common way of handling exceptions in general purpose languages like Java is by means of `try..catch`. One may write exception handling as such:
+```
+int divide(int dividend, int divisor) {
+    if (divisor == 0) {
+        throw new DivideByZeroException();    
+    }
+    return dividend / divisor;
+}
+
+// try... catch...
+try {
+    var result = divide(10, 0);
+} catch (DivideByZeroException e) {
+    log.error("Cannot divide by zero!")
+    ...
+}
+```
+
+Coming from Scala, which has more built in functional programming features than Java, shows functional programming way of error handling:
+* Try/Success/Failure
+* Either/Left/Right
+
+```scala
+// Scala
+def tryDivide(a: Int, b Int): Try[Int] = Try {
+  divide(a, b)
+}
+
+val result = tryDivide(a, b)
+result match {
+  case Failure(e) => println(s"Cannot divide by 0!")
+  case Success(i) => println(i);
+}
+```
+
+These are Monads that should remind us of Java's ```Optional```, which can be thought of a wrapper that represents none or some value. As the name implies, we can represent our method in a data construct such that we expect a success result or failure in some form of exception. Note that with functional library `Vavr`, we can achieve such style in Java as well: 
+```java
+public Either<String, Integer> divide(int first, int second) {
+    if (divisor == 0) {
+        left("Cannot divide by zero!")
+    }
+    return right(dividend / divisor);
+    
+}
+
+...
+
+var result = divide(1, 0);
+
+if (result.isLeft()) 
+    System.out.println(result.getLeft());
+else
+    System.out.println(result.get());
+
+```
+
+#### GlobalExceptionHandler
+
+From the contractual perspective, in case of errors, how should we ensure that client gets consistent API error response views? A way of solving this is that we should define a global exception handler that act on application specific RuntimeExceptions before they are further propagated to client. For example, if a downstream service host is down or still busy after retrying, instead of throwing back a generic 500 to client,
+
+```json
+{
+  "error": "Internal Server Error",
+  "timestamp": "2024-05-04T22:43:37Z"
+}
+```
+We can respond with a more custom one
+```json
+{
+  "id": "bbec38e0-1b5f-4f4d-8bb1-8ffc21a8bf44",
+  "error": "Unable to process. Contact support team for more details.",
+  "timestamp": "2024-05-04T22:43:37Z"
+}
+```
+In our application:
+```
+public ClientConfig implements ErrorDecoder {
+    @Override
+    public Exception decode(Response response) {
+        if (respones.status() >= 500) {
+            throw new DownstreamServerException(..);
+        } else if (response.status() == 429 {
+            throw new DownstreamThrottlingException();
+        }
+        ...
+    }
+}
+
+// throws RunttimeException of above type
+val response = DownstreamClient.getUser(id);
+
+// RestControllerAdvice - Centralized place to map our error format
+@ExceptionHandler({DownstreamException.class})
+public ResponseEntity<ErrorResponse> handleDownstreamException(DownstreamException e) {...}
+
+// ErrorResponse
+public record ErrorResponse (
+    UUID id;
+    String error;
+    Instant
+) {..}
+```
+
+
 
 
 ### Extensibility in OOP
