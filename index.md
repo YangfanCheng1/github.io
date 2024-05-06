@@ -19,7 +19,7 @@ Much of my experience is in the Java/SpringBoot/Docker/Kubernetes/AWS ecosystem.
 
 _OutLook_
 
-Many languages/frameworks go through cycles of being relevant and what I aim at is by covering breadth and depth of many subjects through rigorous studying. With the rise of AI in recent years, I intend to shift some focus to this field but at the same time I feel the lack of foundational understanding - such as related mathematics - has become the greatest inertia to overcome. I'd be very excited to learn & contribute should the opportunity presents itself!
+Many languages/frameworks go through cycles of being relevant, and what I aim at is to acquire knowledge covering both breadth and depth of many subjects through rigorous studying. With the rise of AI in recent years, I intend to shift some focus to this field but at the same time I feel the lack of foundational understanding - such as related mathematics - has become the greatest inertia to overcome. I'd be very excited to learn & contribute should the opportunity presents itself!
 
 
 ## Github
@@ -532,11 +532,69 @@ public record ErrorResponse (
 
 
 ### Extensibility in OOP
-Extensibility in OOP can allow for great flexibility & creativity in problem. Ever coming cross a need to build key value pairs in a HashMap but not wanting to add entries with `null` values? Here is a typical solution:
+Extensibility in OOP can allow for great flexibility & creativity in problem. 
+
+Let's look at a use case:
+
+A online bookstore has a database where each book ISBN has an inventory count and its associated transactions. User to the site can carry out a transaction on any book product. 
+```
+Book {
+  "_id": ISBN
+  "inventory": Int
+  "transactions": [
+    {
+      "user": $Ref userId
+    }
+    ...
+  ]
+  "createdAt": ISO_8601
+  "updatedAt": ISO_8601
+}
+```
+On the application side, if the developer isn't aware of potential race conditions, he would likely make a mistake in how the database object gets updated:
+```
+public boolean addBookTransaction(Transaction newTransaction) {
+    ...
+    val bookEntity=book.withTransactions(
+        book.transactions.add(newTransaction));
+    bookRepository.save(bookEntity);
+    ...
+}
+```
+This is dangerous as in the non synchronized setting, two different ```addBookTransaction``` could occur at the same time and have their own local copy of new `Book`. The database would store only either copy of the new Book, whichever comes later due to overwriting.
+
+
+If one is using Spring Data, we know that `BookRepository` will inherit basic CRUD operations (from MongoRepository), and we need not provide any implementation, but how we can enable this `BookRepository` to have some safe atomic operations? In Spring Data, we could easily have `BookRepository` extending another interface, say, `AtomicOpsBookRepository`.
+```java
+public interface BookRepository extends MongoRepository<Book, String>, AtomicOpsBookRepository {
+    //..
+}
+
+public interface AtomicOpsBookRepository {
+    Book addTransaction(String bookId, Transaction book);
+}
+
+public class SimpleAtomicOpsBookRepository implements AtomicOpsBookRepository {
+    @Override
+    public Book addTransaction(String bookId, Transaction transaction) {
+        return mongoTemplate.findAndModify(
+                new Query(Criteria.where("bookId").is(bookId)),
+                new Update()
+                        .inc("inventory", amountToAdd)
+                        .push("transactions", transactionToAdd)
+                        .set("updatedOn", Instant.now()),
+                options().returnNew(true),
+                Book.class);
+    }
+}
+```
+Let's now look at another example.
+
+Ever coming cross a need to build key value pairs in a HashMap but not wanting to add entries with `null` values? Here is a typical solution:
 ```
 void addHeaderIfNotNull(Map<String, String> headers, String key, String val) {
     if (val != null) {
-        header.add(key, val);
+        headers.add(key, val);
     }
 }
 ..
