@@ -506,7 +506,7 @@ public ClientConfig implements ErrorDecoder {
     public Exception decode(Response response) {
         if (respones.status() >= 500) {
             throw new DownstreamServerException(..);
-        } else if (response.status() == 429 {
+        } else if (response.status() == 429) {
             throw new DownstreamThrottlingException();
         }
         ...

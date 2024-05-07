@@ -3,6 +3,7 @@ Let's talk following System/Cloud Architecture subjects!
  * [Multi-Region/FailOver](#multi-regionfailover)
  * [Distributed Tracing](#distributed-tracing--observability)
  * [Distrbuted Configruation](#distributed-configuration)
+ * [Function as a Service (FaaS)](#function-as-a-service-faas)
 
 ## Multi-region/FailOver
 Having our application hosted in multiple regions not only improve overall latency but also provide a way to fail over in event of any regional outage. Furthermore, a centralized domain - say `example.com` instead of `example.east.com` and `exmaple.west.com` - should be used with a DNS Service like AWS Route53 that takes care of routing. 
@@ -114,4 +115,12 @@ public class MyAppConfig {
 
 #### Cloud Config
 
-how do we treat application configuration updates as a versioning system? Spring Cloud Config offers this solution
+how do we treat application configuration updates as a versioning system? Spring Cloud Config offers this solution. We can actually store the history of all configuration changes as a Git repository, with each service maintaining a version tag like so:
+```
+my-app-a-1.2.3
+my-app-b-9.8.7
+..
+```
+
+
+### Function as a Service (FaaS)
