@@ -210,6 +210,43 @@ public sychronized Future<Integer> syncByFile(MultipartFile file) {
 }
 ```
 
+#### Thread-safety
+Imagine a scenario where we have to implement a simple LRU Cache in Java using LinkedHashMap:
+```java
+void LRUCacheTesting() throws InterruptedException {
+    int MAX_SIZE = 1;
+    Map<String, String> cache = new LinkedHashMap<String, String>() {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > MAX_SIZE;
+        }
+    });
+
+    List<Runnable> tasks = Arrays.asList(
+            () -> {
+                cache.put("k0", "v0");
+                cache.put("k1", "v1");
+            },
+            () -> {
+                cache.put("k0", "v0");
+                cache.put("k2", "v2");
+            }
+    );
+    ExecutorService executorService = Executors.newFixedThreadPool(2);
+    CompletableFuture[] futures = tasks.stream()
+            .map(task -> CompletableFuture.runAsync(task, executorService))
+            .toArray(CompletableFuture[]::new);
+    CompletableFuture.allOf(futures).join();
+    executorService.shutdown();
+
+    assertAll("Checking Cache State",
+            () -> assertTrue(cache.size() == 1),
+            () -> assertFalse(cache.containsKey("k0")),
+            () -> assertTrue((cache.containsKey("k1") || cache.containsKey("k2")))
+    );
+}
+```
+TODO
 
 ### Design Pattern - Chain of Responsibility
 Let's visit one of the popular design patterns - Chain of Responsibility. With Lambda's syntactic sugar since Java 8, we could write much concise code using such pattern. Say we want to implement a search functionality in a file system, and this search has various criteria by which resulting files are filtered. We could define a Filter interface as such:
