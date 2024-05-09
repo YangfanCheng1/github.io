@@ -53,7 +53,7 @@ Technologies used:
 In distributed tracing, a span tree is constructed as illustrated with below diagram:
 
 
-![Distributed Tracing](distributed-tracing.png)
+![Distributed Tracing](images/distributed-tracing.png)
 
 Given above setup, it becomes intuitive to trace the life cycle of a client request. In each downstream call, we can observe the internal state of the request by looking up its spanId.
 
@@ -115,12 +115,31 @@ public class MyAppConfig {
 
 #### Cloud Config
 
-how do we treat application configuration updates as a versioning system? Spring Cloud Config offers this solution. We can actually store the history of all configuration changes as a Git repository, with each service maintaining a version tag like so:
+how do we treat application configuration updates as a versioning system? Spring Cloud Config offers this solution. We can actually store the history of all configuration changes in a Git repository, with each service maintaining a version tag like so:
+
+![Distributed Tracing](images/cloud-config.png)
 ```
-my-app-a-1.2.3
+/my-app-a
+    /dev
+        application.yaml
+    /qa
+        ..
+    /stage
+    /prod
+/my-app-b
+    /dev
+    /qa
+    /stage
+    /prod-east
+    /prod-west
+
+# Git tag (version to deploy)
+my-app-a-1.0.0
+my-app-a-1.0.1
 my-app-b-9.8.7
 ..
 ```
+As part of CICD, we can then generate a tag/label as a snapshot for deployment.
 
 
 ### Function as a Service (FaaS)
